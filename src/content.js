@@ -662,9 +662,33 @@ function insertScript(text, data) {
 }
 
 function emitMsg(type, msg) {
-  console.log('type: ', type, '; msg: ', msg, '; msg.value: ', msg.value);
+  visitData.records.push({
+      'type': type,
+      'msg': msg,
+      'value': msg.value,
+  });
+
   //self.port.emit(type, msg);
 }
+
+/** 
+ * Init meta data object.
+ * TODO: Need interationTime
+ */
+var visitData = {
+    visitMetaData: {},
+    pageData: {},
+    records: [],
+};
+visitData.visitMetaData.visitStartTime = Date.now();
+visitData.pageData.url = window.location.href;
+visitData.pageData.domain = window.location.hostname;
+
+// Stay at a single page for 5 seconds
+setTimeout(function(){ 
+  visitData.visitMetaData.visitEndTime = Date.now();
+  console.log(JSON.stringify(visitData));
+}, 5000);
 
 var event_id = Math.random();
 
@@ -685,3 +709,7 @@ insertScript(getPageScript(), {
   event_id: event_id,
   testing: true
 });
+window.addEventListener('load', function (){
+  var pageLoadDate = Date.now();
+  visitData.visitMetaData.pageFullyLoadedTime = pageLoadDate;
+}, false);
