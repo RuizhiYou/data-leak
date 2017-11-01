@@ -14,7 +14,9 @@
     {
       "matches": ["<all_urls>"],
       "js": ["content.js"],
-      "run_at": "document_start"
+      "run_at": "document_start",
+      "all_frames": true
+>>>>>>> 54a5ce32e0cca95ae95b0c89a9dd61cce0f2298b
     }
   ],
   "background": {
