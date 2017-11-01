@@ -668,16 +668,14 @@ function insertScript(text, data) {
 }
 
 function emitMsg(type, msg) {
-  visitData.records.push({
-      'type': type,
-      'msg': msg,
-      'value': msg.value,
-  });
-
   if (window.self !== window.top) {
     window.top.postMessage({request: 'emitMsg', type: type, msg: msg}, '*');
   } else {
-    console.log('type: ', type, '; msg: ', msg, '; msg.value: ', msg.value);
+    visitData.records.push({
+      'type': type,
+      'msg': msg,
+      'value': msg.value,
+    });
     //self.port.emit(type, msg);
   }
 }
@@ -722,11 +720,12 @@ window.addEventListener('message', function(event) {
   }
 }, false)
 
-insertScript(getPageScript(), {
-  event_id: event_id,
-  testing: true
-});
 window.addEventListener('load', function (){
   var pageLoadDate = Date.now();
   visitData.visitMetaData.pageFullyLoadedTime = pageLoadDate;
 }, false);
+
+insertScript(getPageScript(), {
+  event_id: event_id,
+  testing: true
+});
