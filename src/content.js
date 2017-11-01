@@ -68,6 +68,8 @@ function getPageScript() {
 
     var testing = document.currentScript.getAttribute('data-testing') === 'true';
     console.log("Currently testing?",testing);
+    console.log("Frame: " + window.frameElement);
+    console.log("Location: " + window.location.href);
 
     // Recursively generates a path for an element
     function getPathToDomElement(element, visibilityAttr=false) {
@@ -272,7 +274,9 @@ function getPageScript() {
         funcName: callContext.funcName,
         scriptLocEval: callContext.scriptLocEval,
         callStack: callContext.callStack,
-        timeStamp: new Date().toISOString()
+        timeStamp: new Date().toISOString(),
+        inIframe: window.self !== window.top,
+        location: window.location.href
       };
 
       try {
@@ -314,7 +318,9 @@ function getPageScript() {
           funcName: callContext.funcName,
           scriptLocEval: callContext.scriptLocEval,
           callStack: callContext.callStack,
-          timeStamp: new Date().toISOString()
+          timeStamp: new Date().toISOString(),
+          inIframe: window.self !== window.top,
+          location: window.location.href
         }
         send('logCall', msg);
       }
@@ -668,7 +674,12 @@ function emitMsg(type, msg) {
       'value': msg.value,
   });
 
-  //self.port.emit(type, msg);
+  if (window.self !== window.top) {
+    window.top.postMessage({request: 'emitMsg', type: type, msg: msg}, '*');
+  } else {
+    console.log('type: ', type, '; msg: ', msg, '; msg.value: ', msg.value);
+    //self.port.emit(type, msg);
+  }
 }
 
 /** 
@@ -704,6 +715,12 @@ document.addEventListener(event_id, function (e) {
     emitMsg(msgs['type'],msgs['content']);
   }
 });
+
+window.addEventListener('message', function(event) {
+  if (event.data.request === 'emitMsg') {
+    emitMsg(event.data.type, event.data.msg);
+  }
+}, false)
 
 insertScript(getPageScript(), {
   event_id: event_id,
